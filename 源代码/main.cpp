@@ -16,24 +16,10 @@
 //}
 int main()
 {
-	/*Project P(2);
+	Project P(2);
 	P.LoadData("D:/ce/ceshi.xlsx");
-	P.calculateVariable();*/
-	/*xlnt::workbook wb;
-	auto sheet1 = wb.active_sheet();
-	sheet1.title("sheet0");
-	for (int i = 0; i < 3; i++)
-	{
-		auto ws = wb.copy_sheet(sheet1);
-		ws.cell("A1").value(i+1);
-		string str = "2013Äê5ÔÂ9ÈÕ";
-		ws.cell("B2").value("(mm)");
-	}
-	wb.remove_sheet(sheet1);
-	wb.save("D:/ce/result.xlsx");*/
-	/*double a = -1.987345;
-	string s;
-	SaveTwoDecimal(a, s);
-	cout << s << endl;*/
+	P.calculateVariable();
+	GenerateResults G;
+	G.GenerateResultsTable(P, "D:/ce/result.xlsx");
 	return 0;
 }

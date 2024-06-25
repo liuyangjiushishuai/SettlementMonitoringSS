@@ -1267,7 +1267,8 @@ public:
 			qy[i].countMoreLimitGZW();
 		}
 		//测试
-		/*for (int i = 0; i < this->qy.size(); i++)
+		string s1;
+		for (int i = 0; i < this->qy.size(); i++)
 		{
 			for (int j = 0; j < this->qy[i].ContainGZW.size(); j++)
 			{
@@ -1280,12 +1281,12 @@ public:
 						cout << this->qy[i].ContainGZW[j].ContainSettlementPoint[k].cl_height[m] << " " <<
 							this->qy[i].ContainGZW[j].ContainSettlementPoint[k].SettlementAmount[m] << " " <<
 							this->qy[i].ContainGZW[j].ContainSettlementPoint[k].AccumulateSettlementAmount[m] << " " << fixed << setprecision(3) <<
-							SaveThreeDecimal(this->qy[i].ContainGZW[j].ContainSettlementPoint[k].SettlementSpeed[m]) << " ";
+							SaveThreeDecimal(this->qy[i].ContainGZW[j].ContainSettlementPoint[k].SettlementSpeed[m],s1) << " ";
 					}
 					cout << endl;
 				}
 			}
-		}*/
+		}
 		//测试
 		/*for (int i = 0; i < this->qy.size(); i++)
 		{
@@ -1363,7 +1364,7 @@ public:
 			while (CurrentFrequency<frequency)
 			{
 				c++;
-				string CurrentTableName= CurrentRegionName += "（" + TableOrder[c] + "）"; //目前的表名
+				string CurrentTableName= CurrentRegionName +"（" + TableOrder[c] + "）"; //目前的表名
 				int limit = 0;
 				if (c == 1)
 				{
@@ -1452,7 +1453,7 @@ public:
 									//将高程数据写入
 									string NumStr = "";
 									SaveTwoDecimal(P.qy[i].ContainGZW[j].ContainSettlementPoint[m].cl_height[k], NumStr);
-									ws.cell(3 + f, GZWStartRow + m).value(String_To_UTF8(NumStr));
+									ws.cell(3 + f, GZWStartRow + m+1).value(String_To_UTF8(NumStr));
 								}
 								else if (k == 1)
 								{
@@ -1463,13 +1464,13 @@ public:
 									//将高程数据写入
 									string NumStr = "";
 									SaveTwoDecimal(P.qy[i].ContainGZW[j].ContainSettlementPoint[m].cl_height[k], NumStr);
-									ws.cell(3 + f, GZWStartRow + m).value(String_To_UTF8(NumStr));
+									ws.cell(3 + f, GZWStartRow + m+1).value(String_To_UTF8(NumStr));
 									//将本次沉降量写入
 									SaveTwoDecimal(P.qy[i].ContainGZW[j].ContainSettlementPoint[m].SettlementAmount[k], NumStr);
-									ws.cell(3 + f+1, GZWStartRow + m).value(String_To_UTF8(NumStr));
+									ws.cell(3 + f+1, GZWStartRow + m+1).value(String_To_UTF8(NumStr));
 									//将沉降速率写入
 									SaveThreeDecimal(P.qy[i].ContainGZW[j].ContainSettlementPoint[m].SettlementSpeed[k], NumStr);
-									ws.cell(3 + f+2, GZWStartRow + m).value(String_To_UTF8(NumStr));
+									ws.cell(3 + f+2, GZWStartRow + m+1).value(String_To_UTF8(NumStr));
 								}
 								else if (k == 2)
 								{
@@ -1480,21 +1481,21 @@ public:
 									//将高程数据写入
 									string NumStr = "";
 									SaveTwoDecimal(P.qy[i].ContainGZW[j].ContainSettlementPoint[m].cl_height[k], NumStr);
-									ws.cell(3 + f+2, GZWStartRow + m).value(String_To_UTF8(NumStr));
+									ws.cell(3 + f+2, GZWStartRow + m+1).value(String_To_UTF8(NumStr));
 									//将本次沉降量写入
 									SaveTwoDecimal(P.qy[i].ContainGZW[j].ContainSettlementPoint[m].SettlementAmount[k], NumStr);
-									ws.cell(3 + f + 3, GZWStartRow + m).value(String_To_UTF8(NumStr));
+									ws.cell(3 + f + 3, GZWStartRow + m+1).value(String_To_UTF8(NumStr));
 									//将累计沉降量写入
 									SaveTwoDecimal(P.qy[i].ContainGZW[j].ContainSettlementPoint[m].AccumulateSettlementAmount[k], NumStr);
-									ws.cell(3 + f + 4, GZWStartRow + m).value(String_To_UTF8(NumStr));
+									ws.cell(3 + f + 4, GZWStartRow + m+1).value(String_To_UTF8(NumStr));
 									//将沉降速率写入
 									SaveThreeDecimal(P.qy[i].ContainGZW[j].ContainSettlementPoint[m].SettlementSpeed[k], NumStr);
-									ws.cell(3 + f + 5, GZWStartRow + m).value(String_To_UTF8(NumStr));
+									ws.cell(3 + f + 5, GZWStartRow + m+1).value(String_To_UTF8(NumStr));
 								}
 								f++;
 							}
 						}
-						GZWStartRow += P.qy[i].ContainGZW[j].ContainSettlementPoint.size() + 1; //刷新构筑物开始行数
+						GZWStartRow += P.qy[i].ContainGZW[j].ContainSettlementPoint.size(); //刷新构筑物开始行数
 					}
 					//将观测间隔天数写入
 					ws.cell(1, GZWStartRow + 1).value(String_To_UTF8("观测间隔天数(d)"));
@@ -1528,6 +1529,10 @@ public:
 					string MonitoringUnit="监测单位：";
 					MonitoringUnit += CompanyName;
 					ws.cell(1, GZWStartRow + 4).value(String_To_UTF8(MonitoringUnit));
+					//更新每个表的开始行数
+					StartRowNum = GZWStartRow + 5;
+					//更新每个表的开始期数
+					StartFrequency = CurrentFrequency;
 				}
 				else
 				{
@@ -1580,89 +1585,115 @@ public:
 							int f = 0;
 							for (int k = StartFrequency; k < min(limit, frequency); k++)
 							{
-								if (k == 0)
+								if (abs(P.qy[i].ContainGZW[j].ContainSettlementPoint[m].cl_height[k] + 100) <= 1e-6)
 								{
-									if (abs(P.qy[i].ContainGZW[j].ContainSettlementPoint[m].cl_height[k] + 100) <= 1e-6)
-									{
-										continue;
-									}
-									//将高程数据写入
-									string NumStr = "";
-									SaveTwoDecimal(P.qy[i].ContainGZW[j].ContainSettlementPoint[m].cl_height[k], NumStr);
-									ws.cell(3 + f, GZWStartRow + m).value(String_To_UTF8(NumStr));
+									continue;
 								}
-								else if (k == 1)
-								{
-									if (abs(P.qy[i].ContainGZW[j].ContainSettlementPoint[m].cl_height[k] + 100) <= 1e-6)
-									{
-										continue;
-									}
-									//将高程数据写入
-									string NumStr = "";
-									SaveTwoDecimal(P.qy[i].ContainGZW[j].ContainSettlementPoint[m].cl_height[k], NumStr);
-									ws.cell(3 + f, GZWStartRow + m).value(String_To_UTF8(NumStr));
-									//将本次沉降量写入
-									SaveTwoDecimal(P.qy[i].ContainGZW[j].ContainSettlementPoint[m].SettlementAmount[k], NumStr);
-									ws.cell(3 + f + 1, GZWStartRow + m).value(String_To_UTF8(NumStr));
-									//将沉降速率写入
-									SaveThreeDecimal(P.qy[i].ContainGZW[j].ContainSettlementPoint[m].SettlementSpeed[k], NumStr);
-									ws.cell(3 + f + 2, GZWStartRow + m).value(String_To_UTF8(NumStr));
-								}
-								else if (k == 2)
-								{
-									if (abs(P.qy[i].ContainGZW[j].ContainSettlementPoint[m].cl_height[k] + 100) <= 1e-6)
-									{
-										continue;
-									}
-									//将高程数据写入
-									string NumStr = "";
-									SaveTwoDecimal(P.qy[i].ContainGZW[j].ContainSettlementPoint[m].cl_height[k], NumStr);
-									ws.cell(3 + f + 2, GZWStartRow + m).value(String_To_UTF8(NumStr));
-									//将本次沉降量写入
-									SaveTwoDecimal(P.qy[i].ContainGZW[j].ContainSettlementPoint[m].SettlementAmount[k], NumStr);
-									ws.cell(3 + f + 3, GZWStartRow + m).value(String_To_UTF8(NumStr));
-									//将累计沉降量写入
-									SaveTwoDecimal(P.qy[i].ContainGZW[j].ContainSettlementPoint[m].AccumulateSettlementAmount[k], NumStr);
-									ws.cell(3 + f + 4, GZWStartRow + m).value(String_To_UTF8(NumStr));
-									//将沉降速率写入
-									SaveThreeDecimal(P.qy[i].ContainGZW[j].ContainSettlementPoint[m].SettlementSpeed[k], NumStr);
-									ws.cell(3 + f + 5, GZWStartRow + m).value(String_To_UTF8(NumStr));
-								}
+								//将高程数据写入
+								string NumStr = "";
+								SaveTwoDecimal(P.qy[i].ContainGZW[j].ContainSettlementPoint[m].cl_height[k], NumStr);
+								ws.cell(3 + 4*f, GZWStartRow + m+1).value(String_To_UTF8(NumStr));
+								//将本次沉降量写入
+								SaveTwoDecimal(P.qy[i].ContainGZW[j].ContainSettlementPoint[m].SettlementAmount[k], NumStr);
+								ws.cell(3 + 4*f + 1, GZWStartRow + m+1).value(String_To_UTF8(NumStr));
+								//将累计沉降量写入
+								SaveTwoDecimal(P.qy[i].ContainGZW[j].ContainSettlementPoint[m].AccumulateSettlementAmount[k], NumStr);
+								ws.cell(3 + 4*f + 2, GZWStartRow + m+1).value(String_To_UTF8(NumStr));
+								//将沉降速率写入
+								SaveThreeDecimal(P.qy[i].ContainGZW[j].ContainSettlementPoint[m].SettlementSpeed[k], NumStr);
+								ws.cell(3 + 4*f + 3, GZWStartRow + m+1).value(String_To_UTF8(NumStr));
 								f++;
 							}
 						}
-						GZWStartRow += P.qy[i].ContainGZW[j].ContainSettlementPoint.size() + 1; //刷新构筑物开始行数
+						GZWStartRow += P.qy[i].ContainGZW[j].ContainSettlementPoint.size(); //刷新构筑物开始行数
 					}
 					//将观测间隔天数写入
 					ws.cell(1, GZWStartRow + 1).value(String_To_UTF8("观测间隔天数(d)"));
-					int f = 0;
+					f = 0;
 					for (int k = StartFrequency; k < min(limit, frequency); k++)
 					{
-						if (k == 0)
-						{
-							ws.cell(3 + f, GZWStartRow + 1).value("0");
-						}
-						else if (k == 1)
-						{
-							auto f_time = splitData(data[k - 1]);
-							auto b_time = splitData(data[k]);
-							int interval = calculateTimeInterval(f_time, b_time);
-							ws.cell(3 + f, GZWStartRow + 1).value(interval);
-						}
-						else if (k == 2)
-						{
-							auto f_time = splitData(data[k - 1]);
-							auto b_time = splitData(data[k]);
-							int interval = calculateTimeInterval(f_time, b_time);
-							ws.cell(3 + f + 2, GZWStartRow + 1).value(interval);
-						}
+						auto f_time = splitData(data[k - 1]);
+						auto b_time = splitData(data[k]);
+						int interval = calculateTimeInterval(f_time, b_time);
+						ws.cell(3 + 4*f, GZWStartRow + 1).value(interval);
 						f++;
 					}
 					//将说明写入
 					ws.cell(1, GZWStartRow + 2).value(String_To_UTF8("说明"));
 					ws.cell(3, GZWStartRow + 2).value(String_To_UTF8("1、“-”表示下沉，“+”表示上升。"));
+					//将监测单位写入
+					string MonitoringUnit = "监测单位：";
+					MonitoringUnit += CompanyName;
+					ws.cell(1, GZWStartRow + 4).value(String_To_UTF8(MonitoringUnit));
 				}
 
+			}
+		}
+		wb.remove_sheet(sheet1);
+		wb.save(path);
+	}
+	//生成成果分析表
+	void GenerateResultAnalysisTable(const Project& P/*项目*/, const string& path/*保存路径*/)
+	{
+		xlnt::workbook wb;
+		auto sheet1 = wb.active_sheet();
+		sheet1.title("sheet0");
+		for (int i = 0; i < P.qy.size(); i++)
+		{
+			auto ws = wb.copy_sheet(sheet1);
+			int CurrentRegionPeriod = P.qy[i].frequency;
+			vector<string>data = P.qy[i].data;   //目前区域所测的时间
+			int record = 0;
+			int StartRow = 0;  //每个表的开始行数
+			for (int j = 0; j < P.qy[i].ContainGZW.size(); j++)
+			{
+				int CurrentPeriod = 1;
+				while (CurrentPeriod< CurrentRegionPeriod)
+				{
+					if (CurrentPeriod == 1)
+					{
+						//写入表头
+						ws.cell(1, StartRow + 1).value(String_To_UTF8("点号"));
+						ws.cell(2, StartRow + 1).value(String_To_UTF8(data[CurrentPeriod]));
+						if (CurrentPeriod + 1 < CurrentRegionPeriod)
+						{
+							ws.cell(4, StartRow + 1).value(String_To_UTF8(data[CurrentPeriod+1]));
+						}
+						if (CurrentPeriod + 2 < CurrentRegionPeriod)
+						{
+							ws.cell(7, StartRow + 1).value(String_To_UTF8(data[CurrentPeriod + 2]));
+						}
+						ws.cell(2, StartRow + 2).value(String_To_UTF8("本次沉降量(mm)"));
+						ws.cell(3, StartRow + 2).value(String_To_UTF8("沉降速率(mm/d)"));
+						ws.cell(4, StartRow + 2).value(String_To_UTF8("本次沉降量(mm)"));
+						ws.cell(5, StartRow + 2).value(String_To_UTF8("累计沉降量(mm)"));
+						ws.cell(6, StartRow + 2).value(String_To_UTF8("沉降速率(mm/d)"));
+						ws.cell(7, StartRow + 2).value(String_To_UTF8("本次沉降量(mm)"));
+						ws.cell(8, StartRow + 2).value(String_To_UTF8("累计沉降量(mm)"));
+						ws.cell(9, StartRow + 2).value(String_To_UTF8("沉降速率(mm/d)"));
+					}
+					else
+					{
+						ws.cell(1, StartRow + 1).value(String_To_UTF8("点号"));
+						
+					}
+					int limit = CurrentPeriod + 3;
+					while (CurrentPeriod<min(limit, CurrentRegionPeriod))
+					{
+				
+					}
+				}
+					if (k == 0)
+					{
+						continue;
+					}
+					for (int m = 0; P.qy[i].ContainGZW[j].ContainSettlementPoint.size(); m++)
+					{
+
+					}
+
+
+				}
 			}
 		}
 	}

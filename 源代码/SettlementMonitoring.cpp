@@ -164,14 +164,11 @@ double SaveThreeDecimal(double OriginalData,string&str)
 	}
 
 	int count2 = 0;
-	for (int i = 0; i < t2.size(); i++)
+	for (int i = 0; i < 4; i++)
 	{
-		if (isdigit(t2[i]))
+		if (z[i] == 0)
 		{
-			if (t2[i] == '0')
-			{
-				count2++;
-			}
+			count2++;
 		}
 	}
 	if (count2 == 4)
@@ -266,14 +263,11 @@ double SaveTwoDecimal(double OriginalData,string&str)
 	}
 
 	int count2 = 0;
-	for (int i = 0; i < t2.size(); i++)
+	for (int i = 0; i < 3; i++)
 	{
-		if (isdigit(t2[i]))
+		if (z[i] == 0)
 		{
-			if (t2[i] == '0')
-			{
-				count2++;
-			}
+			count2++;
 		}
 	}
 	if (count2 == 3)
