@@ -1665,9 +1665,11 @@ public:
 						}
 						ws.cell(2, StartRow + 2).value(String_To_UTF8("本次沉降量(mm)"));
 						ws.cell(3, StartRow + 2).value(String_To_UTF8("沉降速率(mm/d)"));
+						
 						ws.cell(4, StartRow + 2).value(String_To_UTF8("本次沉降量(mm)"));
 						ws.cell(5, StartRow + 2).value(String_To_UTF8("累计沉降量(mm)"));
 						ws.cell(6, StartRow + 2).value(String_To_UTF8("沉降速率(mm/d)"));
+						
 						ws.cell(7, StartRow + 2).value(String_To_UTF8("本次沉降量(mm)"));
 						ws.cell(8, StartRow + 2).value(String_To_UTF8("累计沉降量(mm)"));
 						ws.cell(9, StartRow + 2).value(String_To_UTF8("沉降速率(mm/d)"));
@@ -1675,21 +1677,157 @@ public:
 					else
 					{
 						ws.cell(1, StartRow + 1).value(String_To_UTF8("点号"));
-						
+						int f = 0;
+						for (int i = CurrentPeriod; i < CurrentPeriod + 3; i++)
+						{
+							if (i < CurrentRegionPeriod)
+							{
+								ws.cell(2 + f * 3, StartRow + 1).value(String_To_UTF8(data[i]));
+							}
+							ws.cell(2 + f * 3, StartRow + 2).value(String_To_UTF8("本次沉降量(mm)"));
+							ws.cell(2 + f * 3 + 1, StartRow + 2).value(String_To_UTF8("累计沉降量(mm)"));
+							ws.cell(2 + f * 3 + 1 + 1, StartRow + 2).value(String_To_UTF8("沉降速率(mm/d)"));
+							f++;
+						}
+
 					}
 					int limit = CurrentPeriod + 3;
-					while (CurrentPeriod<min(limit, CurrentRegionPeriod))
+					for (int m = 0; P.qy[i].ContainGZW[j].ContainSettlementPoint.size(); m++)
 					{
-				
+						int f = 0;
+						while (CurrentPeriod<min(limit, CurrentRegionPeriod))
+						{
+							double CurrentSettlementAmount = P.qy[i].ContainGZW[j].ContainSettlementPoint[m].
+								SettlementAmount[CurrentPeriod];  //目前的沉降量
+							double CurrentASettleAmount = P.qy[i].ContainGZW[j].ContainSettlementPoint[m].
+								AccumulateSettlementAmount[CurrentPeriod];    //目前的累计沉降量
+							double CurrentSettleSpeed = P.qy[i].ContainGZW[j].ContainSettlementPoint[m].
+								SettlementSpeed[CurrentPeriod];  //目前的沉降速度
+							if (CurrentPeriod == 1)
+							{
+								if (abs(CurrentSettlementAmount + 1000) > 1e-6)
+								{
+									string s="";   //沉降量字符串
+									SaveTwoDecimal(CurrentSettlementAmount, s);
+									ws.cell(2, StartRow + 2 + m + 1).value(String_To_UTF8(s));
+								}
+								if (abs(CurrentSettleSpeed + 1000) > 1e-6)
+								{
+									string s = "";   //沉降速率字符串
+									SaveThreeDecimal(CurrentSettleSpeed, s);
+									ws.cell(3, StartRow + 2 + m + 1).value(String_To_UTF8(s));
+								}
+							}
+							else if (CurrentPeriod == 2)
+							{
+								if (abs(CurrentSettlementAmount + 1000) > 1e-6)
+								{
+									string s = "";   //沉降量字符串
+									SaveTwoDecimal(CurrentSettlementAmount, s);
+									ws.cell(4, StartRow + 2 + m + 1).value(String_To_UTF8(s));
+								}
+								if (abs(CurrentASettleAmount + 1000) > 1e-6)
+								{
+									string s = "";   //累计沉降量字符串
+									SaveTwoDecimal(CurrentASettleAmount, s);
+									ws.cell(5, StartRow + 2 + m + 1).value(String_To_UTF8(s));
+								}
+								if (abs(CurrentSettleSpeed + 1000) > 1e-6)
+								{
+									string s = "";   //沉降速率字符串
+									SaveThreeDecimal(CurrentSettleSpeed, s);
+									ws.cell(6, StartRow + 2 + m + 1).value(String_To_UTF8(s));
+								}
+
+							}
+							else if (CurrentPeriod == 3)
+							{
+								if (abs(CurrentSettlementAmount + 1000) > 1e-6)
+								{
+									string s = "";   //沉降量字符串
+									SaveTwoDecimal(CurrentSettlementAmount, s);
+									ws.cell(7, StartRow + 2 + m + 1).value(String_To_UTF8(s));
+								}
+								if (abs(CurrentASettleAmount + 1000) > 1e-6)
+								{
+									string s = "";   //累计沉降量字符串
+									SaveTwoDecimal(CurrentASettleAmount, s);
+									ws.cell(8, StartRow + 2 + m + 1).value(String_To_UTF8(s));
+								}
+								if (abs(CurrentSettleSpeed + 1000) > 1e-6)
+								{
+									string s = "";   //沉降速率字符串
+									SaveThreeDecimal(CurrentSettleSpeed, s);
+									ws.cell(9, StartRow + 2 + m + 1).value(String_To_UTF8(s));
+								}
+							}
+							else
+							{
+								if (abs(CurrentSettlementAmount + 1000) > 1e-6)
+								{
+									string s = "";   //沉降量字符串
+									SaveTwoDecimal(CurrentSettlementAmount, s);
+									ws.cell(2+f*3, StartRow + 2 + m + 1).value(String_To_UTF8(s));
+								}
+								if (abs(CurrentASettleAmount + 1000) > 1e-6)
+								{
+									string s = "";   //累计沉降量字符串
+									SaveTwoDecimal(CurrentASettleAmount, s);
+									ws.cell(2 + f * 3+1, StartRow + 2 + m + 1).value(String_To_UTF8(s));
+								}
+								if (abs(CurrentSettleSpeed + 1000) > 1e-6)
+								{
+									string s = "";   //沉降速率字符串
+									SaveThreeDecimal(CurrentSettleSpeed, s);
+									ws.cell(2 + f * 3 + 1+1, StartRow + 2 + m + 1).value(String_To_UTF8(s));
+								}
+							}
+							CurrentPeriod++;
+							f++;
+						}
+						CurrentPeriod -= f;
+						f = 0;
 					}
+					//写入平均值
+					int AverageRowNum = StartRow + 1 + P.qy[i].ContainGZW[j].ContainSettlementPoint.size() + 1 + 1;    //平均值所在的行数
+					ws.cell(1, AverageRowNum).value(String_To_UTF8("平均值"));
+					for (int k = CurrentPeriod; k < min(limit, CurrentRegionPeriod); k++)
+					{
+						double AverageSettlementAmount = P.qy[i].ContainGZW[j].AverageSettlementAmount[k]; //平均沉降量
+						double AverageASettlementAmount= P.qy[i].ContainGZW[j].AverageAccumulateSettlementAmount[k];  //平均累积沉降量
+						double AverageSettlementSpeed = P.qy[i].ContainGZW[j].AverageSettlementRate[k];    //平均沉降速率
+						string AverageSettlementAmountStr = "";
+						string AverageASettlementAmountStr = "";
+						string AverageSettlementSpeedStr = "";
+						SaveTwoDecimal(AverageSettlementAmount, AverageSettlementAmountStr);
+						SaveTwoDecimal(AverageASettlementAmount, AverageASettlementAmountStr);
+						SaveThreeDecimal(AverageSettlementSpeed, AverageSettlementSpeedStr);
+						if (k == 1)
+						{
+							if ()
+							ws.cell(2, AverageRowNum).value(String_To_UTF8(AverageSettlementAmountStr));
+							ws.cell(3, AverageRowNum).value(String_To_UTF8(AverageSettlementSpeedStr));
+						}
+						else if (k == 2)
+						{
+							ws.cell(4, AverageRowNum).value(String_To_UTF8(AverageSettlementAmountStr));
+							ws.cell(5, AverageRowNum).value(String_To_UTF8(AverageASettlementAmountStr));
+							ws.cell(6, AverageRowNum).value(String_To_UTF8(AverageSettlementSpeedStr));
+						}
+						else if (k == 3)
+						{
+
+						}
+					}
+					if (CurrentPeriod == 1)
+					{
+					}
+					StartRow+=
+					CurrentPeriod = min(limit, CurrentRegionPeriod);
 				}
 					if (k == 0)
 					{
 						continue;
-					}
-					for (int m = 0; P.qy[i].ContainGZW[j].ContainSettlementPoint.size(); m++)
-					{
-
 					}
 
 
