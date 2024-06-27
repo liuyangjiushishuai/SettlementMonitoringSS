@@ -21,5 +21,6 @@ int main()
 	P.calculateVariable();
 	GenerateResults G;
 	G.GenerateResultsTable(P, "D:/ce/result.xlsx");
+	G.GenerateResultAnalysisTable(P, "D:/ce/ResultAnalysisTable.xlsx");
 	return 0;
 }

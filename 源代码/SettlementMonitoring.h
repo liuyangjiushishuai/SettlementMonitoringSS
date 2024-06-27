@@ -1692,7 +1692,7 @@ public:
 
 					}
 					int limit = CurrentPeriod + 3;
-					for (int m = 0; P.qy[i].ContainGZW[j].ContainSettlementPoint.size(); m++)
+					for (int m = 0;m< P.qy[i].ContainGZW[j].ContainSettlementPoint.size(); m++)
 					{
 						int f = 0;
 						while (CurrentPeriod<min(limit, CurrentRegionPeriod))
@@ -1788,6 +1788,7 @@ public:
 						CurrentPeriod -= f;
 						f = 0;
 					}
+					int f = 0;
 					//写入平均值
 					int AverageRowNum = StartRow + 1 + P.qy[i].ContainGZW[j].ContainSettlementPoint.size() + 1 + 1;    //平均值所在的行数
 					ws.cell(1, AverageRowNum).value(String_To_UTF8("平均值"));
@@ -1804,38 +1805,82 @@ public:
 						SaveThreeDecimal(AverageSettlementSpeed, AverageSettlementSpeedStr);
 						if (k == 1)
 						{
-							if ()
-							ws.cell(2, AverageRowNum).value(String_To_UTF8(AverageSettlementAmountStr));
-							ws.cell(3, AverageRowNum).value(String_To_UTF8(AverageSettlementSpeedStr));
+							if (abs(AverageSettlementAmount + 1000) > 1e-6)
+							{
+								ws.cell(2, AverageRowNum).value(String_To_UTF8(AverageSettlementAmountStr));
+							}
+							if (abs(AverageSettlementSpeed + 1000) > 1e-6)
+							{
+								ws.cell(3, AverageRowNum).value(String_To_UTF8(AverageSettlementSpeedStr));
+							}
 						}
 						else if (k == 2)
 						{
-							ws.cell(4, AverageRowNum).value(String_To_UTF8(AverageSettlementAmountStr));
-							ws.cell(5, AverageRowNum).value(String_To_UTF8(AverageASettlementAmountStr));
-							ws.cell(6, AverageRowNum).value(String_To_UTF8(AverageSettlementSpeedStr));
+
+							if (abs(AverageSettlementAmount + 1000) > 1e-6)
+							{
+								ws.cell(4, AverageRowNum).value(String_To_UTF8(AverageSettlementAmountStr));
+							}
+							if (abs(AverageASettlementAmount + 1000) > 1e-6)
+							{
+								ws.cell(5, AverageRowNum).value(String_To_UTF8(AverageASettlementAmountStr));
+							}
+							if (abs(AverageSettlementSpeed + 1000) > 1e-6)
+							{
+								ws.cell(6, AverageRowNum).value(String_To_UTF8(AverageSettlementSpeedStr));
+							}
 						}
 						else if (k == 3)
 						{
-
+							if (abs(AverageSettlementAmount + 1000) > 1e-6)
+							{
+								ws.cell(7, AverageRowNum).value(String_To_UTF8(AverageSettlementAmountStr));
+							}
+							if (abs(AverageASettlementAmount + 1000) > 1e-6)
+							{
+								ws.cell(8, AverageRowNum).value(String_To_UTF8(AverageASettlementAmountStr));
+							}
+							if (abs(AverageSettlementSpeed + 1000) > 1e-6)
+							{
+								ws.cell(9, AverageRowNum).value(String_To_UTF8(AverageSettlementSpeedStr));
+							}
+						}
+						else
+						{
+							if (abs(AverageSettlementAmount + 1000) > 1e-6)
+							{
+								ws.cell(2+f*3, AverageRowNum).value(String_To_UTF8(AverageSettlementAmountStr));
+							}
+							if (abs(AverageASettlementAmount + 1000) > 1e-6)
+							{
+								ws.cell(2 + f * 3+1, AverageRowNum).value(String_To_UTF8(AverageASettlementAmountStr));
+							}
+							if (abs(AverageSettlementSpeed + 1000) > 1e-6)
+							{
+								ws.cell(2 + f * 3+2, AverageRowNum).value(String_To_UTF8(AverageSettlementSpeedStr));
+							}
 						}
 					}
-					if (CurrentPeriod == 1)
-					{
-					}
-					StartRow+=
+					//写入说明
+					ws.cell(1, AverageRowNum+1).value(String_To_UTF8("说明"));
+					ws.cell(2,AverageRowNum+1).value(String_To_UTF8("1．表中数据单位为mm；\n2．“+”表示上升，“-”表示下沉。"));
+		
+					StartRow = AverageRowNum + 3;
 					CurrentPeriod = min(limit, CurrentRegionPeriod);
-				}
-					if (k == 0)
-					{
-						continue;
-					}
-
-
 				}
 			}
 		}
+		wb.remove_sheet(sheet1);
+		wb.save(path);
+	}
+	//生成分析结果
+	void GenerateAnalysisResult(const Project& P/*项目*/, const string& path/*保存路径*/)
+	{
+
 	}
 };
 
 
 #endif 
+
+
