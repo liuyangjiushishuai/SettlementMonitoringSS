@@ -1644,12 +1644,15 @@ public:
 			int CurrentRegionPeriod = P.qy[i].frequency;
 			vector<string>data = P.qy[i].data;   //目前区域所测的时间
 			int record = 0;
-			int StartRow = 0;  //每个表的开始行数
+			int StartRow = 1;  //每个表的开始行数
 			for (int j = 0; j < P.qy[i].ContainGZW.size(); j++)
 			{
 				int CurrentPeriod = 1;
 				while (CurrentPeriod< CurrentRegionPeriod)
 				{
+					//写入构筑物名称
+					string CurrentGZWName = P.qy[i].ContainGZW[j].name;
+					ws.cell(1, StartRow - 1 + 1).value(String_To_UTF8(CurrentGZWName));
 					if (CurrentPeriod == 1)
 					{
 						//写入表头
@@ -1694,6 +1697,9 @@ public:
 					int limit = CurrentPeriod + 3;
 					for (int m = 0;m< P.qy[i].ContainGZW[j].ContainSettlementPoint.size(); m++)
 					{
+						//写入点名
+						string CurrentPointName = P.qy[i].ContainGZW[j].ContainSettlementPoint[m].name;
+						ws.cell(1, StartRow + 2 + m + 1).value(String_To_UTF8(CurrentPointName));
 						int f = 0;
 						while (CurrentPeriod<min(limit, CurrentRegionPeriod))
 						{
