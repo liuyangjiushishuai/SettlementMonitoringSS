@@ -16,11 +16,17 @@
 //}
 int main()
 {
+	//创建一个项目
 	Project P(2);
+	//导入已有数据
 	P.LoadData("D:/ce/ceshi.xlsx");
+	//计算各种参数
 	P.calculateVariable();
+
+	//生成分析结果
 	GenerateResults G;
 	G.GenerateResultsTable(P, "D:/ce/result.xlsx");
 	G.GenerateResultAnalysisTable(P, "D:/ce/ResultAnalysisTable.xlsx");
+	G.GenerateAnalysisResult(P, "D:/ce/AnalysisResult.txt");
 	return 0;
 }

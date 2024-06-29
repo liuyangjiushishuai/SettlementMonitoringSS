@@ -773,6 +773,9 @@ public:
 	vector<unordered_map<string, vector<double>>>ContainHeight;  //沉降点所包含的高程
 	vector<vector<string>>GZW_order;      //按顺序装的构筑物
 	vector<unordered_map<string, vector<string>>>CJP_order;  //按顺序装的沉降点
+
+
+
 	Project(int RN)
 	{
 		this->RegionNum = RN;
@@ -1334,6 +1337,11 @@ public:
 			}
 		}
 	}
+	//计算间隔月数
+	pair<int, int> calculateIntervalMonths()
+	{
+
+	}
 };
 
 //生成成果
@@ -1880,9 +1888,165 @@ public:
 		wb.save(path);
 	}
 	//生成分析结果
-	void GenerateAnalysisResult(const Project& P/*项目*/, const string& path/*保存路径*/)
+	void GenerateAnalysisResult( Project& P/*项目*/, const string& path/*保存路径*/)
 	{
+		std::ofstream outfile(path); // 创建ofstream对象，并打开文件
 
+		if (!outfile.is_open()) { // 检查文件是否成功打开
+			std::cerr << "无法打开文件" << std::endl;
+			system("pause");
+			exit(1);
+		}
+		//写入分析结果
+		for (int i = 0; i < P.qy.size(); i++)
+		{
+			//写入区域名称
+			outfile << RegionName[i]<< std::endl;
+
+
+			for (int j = 0; j < P.qy[i].ContainGZW.size(); j++)
+			{
+				string CurrentGZWName = P.qy[i].ContainGZW[j].name;  //目前的构筑物名称
+				int CurrentGZWAllPointNum = P.qy[i].ContainGZW[j].SettlementPointNum;  //目前的构筑物总点数
+				int CurrentGZWUnstablePointNum = P.qy[i].ContainGZW[j].countUnstablePointNum();  //目前的构筑物不稳定的点数
+				double CurrentMaxASettlementAmount = P.qy[i].ContainGZW[j].
+					calcualteMaxAccumulateSettlementAmount();  //目前的构筑物最大累计沉降量
+				double CurrentMinASettlementAmount = P.qy[i].ContainGZW[j].
+					calcualteMinAccumulateSettlementAmount();  //目前的构筑物最小累计沉降量
+
+				P.qy[i].ContainGZW[j].calcualteEachIssueAverageAccumulateSettlementAmount();
+				double CurrentAverageASettlementAmount = P.qy[i].ContainGZW[j].
+					AverageAccumulateSettlementAmount[P.qy[i].ContainGZW[j].frequency - 1]; //目前的构筑物平均累计沉降量
+				double CurrentMaxSettlementSpeed = P.qy[i].ContainGZW[j].
+					calcualteMaxSettlementRate();  //目前构筑物的最大沉降速率
+				double CurrentMinSettlementSpeed = P.qy[i].ContainGZW[j].
+					calcualteMinSettlementRate();  //目前构筑物的最小沉降速率 
+
+				P.qy[i].ContainGZW[j].calculateEachIssueAverageSettlementSpeed();
+				double CurrentAverageSettlementSpeed = P.qy[i].ContainGZW[j].AverageSettlementRate
+					[P.qy[i].ContainGZW[j].frequency - 1]; //目前构筑物的平均沉降速率 
+
+				//将构筑物的统计信息写入文本
+				outfile << CurrentGZWName << std::endl;
+				outfile << "总点数:" << CurrentGZWAllPointNum << endl;
+				outfile << "未稳定点数:" << CurrentGZWUnstablePointNum << endl;
+				if (abs(CurrentMaxASettlementAmount + 1000) <= 1e-6)
+				{
+					outfile << "最大累计沉降量:None" <<endl;
+				}
+				else
+				{
+					string s;
+					outfile << "最大累计沉降量:" << fixed<<setprecision(2)<< 
+						SaveTwoDecimal(CurrentMaxASettlementAmount,s)<<"mm"<< endl;
+				}
+				if (abs(CurrentMinASettlementAmount + 1000) <= 1e-6)
+				{
+					outfile << "最小累计沉降量:None" << endl;
+				}
+				else
+				{
+					string s;
+					outfile << "最小累计沉降量:" << fixed << setprecision(2) <<
+						SaveTwoDecimal(CurrentMinASettlementAmount, s) <<"mm" << endl;
+				}
+				if (abs(CurrentAverageASettlementAmount + 1000) <= 1e-6)
+				{
+					outfile << "平均累计沉降量:None" << endl;
+				}
+				else
+				{
+					string s;
+					outfile << "平均累计沉降量:" << fixed << setprecision(2) <<
+						SaveTwoDecimal(CurrentAverageASettlementAmount, s)<<"mm" << endl;
+				}
+				if (abs(CurrentMaxSettlementSpeed + 1000) <= 1e-6)
+				{
+					outfile << "最大沉降速率:None" << endl;
+				}
+				else
+				{
+					string s;
+					outfile << "最大沉降速率:" << fixed << setprecision(3) <<
+						SaveThreeDecimal(CurrentMaxSettlementSpeed, s)<<"mm/d" << endl;
+				}
+				if (abs(CurrentMinSettlementSpeed + 1000) <= 1e-6)
+				{
+					outfile << "最小沉降速率:None" << endl;
+				}
+				else
+				{
+					string s;
+					outfile << "最小沉降速率:" << fixed << setprecision(3) <<
+						SaveThreeDecimal(CurrentMinSettlementSpeed, s)<<"mm/d" << endl;
+				}
+				if (abs(CurrentAverageSettlementSpeed + 1000) <= 1e-6)
+				{
+					outfile << "平均沉降速率:None" << endl;
+				}
+				else
+				{
+					string s;
+					outfile << "平均沉降速率:" << fixed << setprecision(3) <<
+						SaveThreeDecimal(CurrentAverageSettlementSpeed, s)<<"mm/d" << endl;
+				}
+			}
+			P.qy[i].calculateMinAverageAccumulateSettlementAmount();
+			double MinAverageASettlementAmount = P.qy[i].
+				MinAverageAccumulateSettlementAmount;  //该区域所有构筑物中最小的平均累计沉降量数值
+			string MinAverageASettlementAmountGZWName = P.qy[i].
+				MinAASettlementAmountGZW;   //该区域所有构筑物中最小的平均累计沉降量构筑物
+			P.qy[i].calculateMaxAverageAccumulateSettlementAmount();
+			double MaxAverageASettlementAmount = P.qy[i].
+				MaxAverageAccumulateSettlementAmount;  //该区域所有构筑物中最大的平均累计沉降量数值
+			string MaxAverageASettlementAmountGZWName = P.qy[i].
+				MaxAASettlementAmountGZW;   //该区域所有构筑物中最大的平均累计沉降量构筑物 
+			P.qy[i].calculateMinAverageSettlementRate();
+			double MinAverageSettlementRate = P.qy[i].
+				MinAverageSettlementRate;  //该区域所有构筑物中最小的平均沉降速率数值
+			string MinAverageSettlementRateGZWName = P.qy[i].
+				MinASettlementRateGZW;   //该区域所有构筑物中最小的平均沉降速率构筑物
+			P.qy[i].calculateMaxAverageSettlementRate();
+			double MaxAverageSettlementRate = P.qy[i].
+				MaxAverageSettlementRate;  //该区域所有构筑物中最大的平均沉降速率数值
+			string MaxAverageSettlementRateGZWName = P.qy[i].
+				MaxASettlementRateGZW;   //该区域所有构筑物中最大的平均沉降速率构筑物
+			P.qy[i].calculateMaxSettlementRate();
+			double CurrentRegionMaxSettlementRate = P.qy[i].MaxSettlementRate;  //该区域所有沉降点中最大的沉降速率数值
+			string CurrentRegionMaxSettlementRatePointName = P.qy[i].
+				MaxSettlementRatePoint;   //该区域中最大的沉降速率沉降点
+			string CurrentRegionMaxSettlementRateGZWName = P.qy[i].
+				MaxSettlementRateGZW;  //该区域中最大的沉降速率沉降点所属的构筑物
+			int UnStableGZWNum = P.qy[i].countMoreLimitGZW();   //该区域中未达到稳定标准的构筑物数
+
+
+			outfile << endl;
+			//将该区域的统计信息写入文本
+			outfile << "最小的平均累计沉降量构筑物:" << MinAverageASettlementAmountGZWName << endl;
+			string s;
+			outfile << "最小的平均累计沉降量:" << fixed << setprecision(2) <<
+				SaveTwoDecimal(MinAverageASettlementAmount, s) <<"mm"<< endl;
+			
+			outfile << "最大的平均累计沉降量构筑物:" << MaxAverageASettlementAmountGZWName << endl;
+			outfile << "最大的平均累计沉降量:" << fixed << setprecision(2) <<
+				SaveTwoDecimal(MaxAverageASettlementAmount, s) <<"mm"<< endl;
+			
+			outfile << "最小的平均沉降速率构筑物:" << MinAverageSettlementRateGZWName << endl;
+			outfile << "最小的平均沉降速率:" << fixed << setprecision(3) <<
+				SaveThreeDecimal(MinAverageSettlementRate, s)<<"mm/d" << endl;
+			
+			outfile << "最大的平均沉降速率构筑物:" << MaxAverageSettlementRateGZWName << endl;
+			outfile << "最大的平均沉降速率:" << fixed << setprecision(3) <<
+				SaveThreeDecimal(MaxAverageSettlementRate, s) << "mm/d" << endl;
+			
+			outfile << "最大的沉降速率构筑物:" << CurrentRegionMaxSettlementRateGZWName << endl;
+			outfile << "最大的沉降速率点:" << CurrentRegionMaxSettlementRatePointName << endl;
+			outfile << "最大的沉降速率:" << fixed << setprecision(3) <<
+				SaveThreeDecimal(CurrentRegionMaxSettlementRate, s) << "mm/d" << endl;
+
+			outfile << "未达到稳定标准的构筑物数:" << UnStableGZWNum << endl << endl << endl;
+		}
+		outfile.close(); // 关闭文件
 	}
 };
 
