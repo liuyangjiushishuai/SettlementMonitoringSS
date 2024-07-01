@@ -24,6 +24,12 @@
 
 
 
+
+
+
+
+
+
 using namespace std;
 using namespace xlnt;
 const string KnownPointName = "c02";    //已知点名称
@@ -1112,11 +1118,108 @@ public:
 		}
 		cout << "计算完成" << endl;
 	}
-	//将最新一期数据加入项目
-	void addNewestData(vector<cz>& d, string path1/*原始水准数据路径*/, string path2/*写入水准数据文件路径*/, int flag/*判断有没有新点,1：有，0：没有*/)
+	//将最新一期数据加入项目，读取水准仪中原始数据，单水准路线平差
+	void addNewestData(vector<cz>& d, string path1/*原始水准数据路径*/, string path2/*写入水准数据文件路径*/, 
+		int flag/*判断有没有新点,1：有，0：没有*/)
 	{
 		readFile(path1, d);
 		allocationClosureError(path2, d);
+		//存储最新一期的沉降点
+		unordered_map<string, double>NewestCJP;
+		for (int i = 0; i < d.size(); i++)
+		{
+			string name = d[i].f_point;
+			double height = d[i].front_point_height;
+			if (name == KnownPointName)
+			{
+				continue;
+			}
+			NewestCJP[name] = height;
+		}
+		for (int j = 0; j < RegionNum; j++)
+		{
+			for (int k = 0; k < this->qy[j].ContainGZW.size(); k++)
+			{
+				for (int m = 0; m < this->qy[j].ContainGZW[k].ContainSettlementPoint.size(); m++)
+				{
+					this->qy[j].ContainGZW[k].ContainSettlementPoint[m].cl_data.push_back(NewestMeasureData);
+					this->qy[j].ContainGZW[k].ContainSettlementPoint[m].Cl_Frequency++;
+					this->qy[j].ContainGZW[k].ContainSettlementPoint[m].cl_height.push_back(-100);
+				}
+				this->qy[j].ContainGZW[k].frequency++;
+			}
+		}
+		for (int i = 0; i < d.size(); i++)
+		{
+			auto CurrentCJPName = d[i].f_point;
+			auto CurrentHeight = d[i].front_point_height;
+			for (int j = 0; j < RegionNum; j++)
+			{
+				for (int k = 0; k < this->qy[j].ContainGZW.size(); k++)
+				{
+					for (int m = 0; m < this->qy[j].ContainGZW[k].ContainSettlementPoint.size(); m++)
+					{
+						if (this->qy[j].ContainGZW[k].ContainSettlementPoint[m].name == CurrentCJPName)
+						{
+							this->qy[j].ContainGZW[k].ContainSettlementPoint[m].cl_height[this->qy[j].ContainGZW[k].frequency - 1] = CurrentHeight;
+						}
+					}
+				}
+			}
+		}
+		//如果有新点
+		if (flag)
+		{
+			if (NewAddPoint.size() == 0)
+			{
+				cout << "请加入新加的点" << endl;
+				system("pause");
+				exit(1);
+			}
+			for (int i = 0; i < NewAddPoint.size(); i++)
+			{
+				string CJPName = NewAddPoint[i];
+				int BelongQY = NewAddPointBelongQY[i];
+				string BelongGZW = NewAddPointBelongGZW[i];
+				cj_point CJP(this->qy[0].ContainGZW[0].frequency, CJPName);
+				CJP.cl_data = this->qy[0].ContainGZW[0].ContainSettlementPoint[0].cl_data;
+				CJP.cl_height.resize(this->qy[0].ContainGZW[0].frequency, -100);
+				CJP.cl_height[this->qy[0].ContainGZW[0].ContainSettlementPoint[0].cl_data.size() - 1] = NewestCJP[CJPName];
+				if (this->ContainGZW[BelongQY].count(BelongGZW) == 0)
+				{
+					GZW gzw(BelongGZW, this->qy[0].ContainGZW[0].frequency);
+					gzw.ContainSettlementPoint.push_back(CJP);
+					gzw.SettlementPointNum++;
+					this->ContainGZW[BelongQY].emplace(BelongGZW);
+					this->ContainCJP[BelongQY].emplace(BelongGZW, unordered_set<string>{CJPName});
+					this->ContainHeight[BelongQY].emplace(CJPName, vector<double>(this->qy[0].ContainGZW[0].ContainSettlementPoint[0].cl_data.size(), -100));
+					this->ContainHeight[BelongQY][CJPName][this->qy[0].ContainGZW[0].ContainSettlementPoint[0].cl_data.size() - 1] = NewestCJP[CJPName];
+					this->GZW_order[BelongQY].push_back(BelongGZW);
+					this->CJP_order[BelongQY].emplace(BelongGZW, vector<string>{CJPName});
+					this->qy[BelongQY].ContainGZW.push_back(gzw);
+				}
+				else
+				{
+					this->ContainCJP[BelongQY][BelongGZW].emplace(CJPName);
+					this->ContainHeight[BelongQY].emplace(CJPName, vector<double>(this->qy[0].ContainGZW[0].ContainSettlementPoint[0].cl_data.size(), -100));
+					this->ContainHeight[BelongQY][CJPName][this->qy[0].ContainGZW[0].ContainSettlementPoint[0].cl_data.size() - 1] = NewestCJP[CJPName];
+					this->CJP_order[BelongQY][BelongGZW].push_back(CJPName);
+					for (int j = 0; j < this->qy[BelongQY].ContainGZW.size(); j++)
+					{
+						if (this->qy[BelongQY].ContainGZW[j].name == BelongGZW)
+						{
+							this->qy[BelongQY].ContainGZW[j].ContainSettlementPoint.push_back(CJP);
+							this->qy[BelongQY].ContainGZW[j].SettlementPointNum++;
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+	void addNewestDataAdjustmented(string path1/*平差后沉降点高程文件路径*/, int flag/*判断有没有新点,1：有，0：没有*/)
+	{
+		//
 		//存储最新一期的沉降点
 		unordered_map<string, double>NewestCJP;
 		for (int i = 0; i < d.size(); i++)
@@ -1336,11 +1439,6 @@ public:
 					SettlementPointNum << "  " << "超限的点数:" << this->qy[i].ContainGZW[j].UnstablePointNum << endl;
 			}
 		}
-	}
-	//计算间隔月数
-	pair<int, int> calculateIntervalMonths()
-	{
-
 	}
 };
 
